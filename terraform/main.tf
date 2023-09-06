@@ -1,8 +1,8 @@
 resource "random_string" "random" {
-  length = 4
+  length  = 4
   special = false
-  upper = false
-  lower = true
+  upper   = false
+  lower   = true
   numeric = true
 }
 
@@ -35,9 +35,9 @@ data "aws_ami" "amzn-linux-2023-ami" {
 }
 
 resource "aws_instance" "example" {
-  ami           = data.aws_ami.amzn-linux-2023-ami.id
-  instance_type = "c6a.2xlarge"
-  subnet_id     = aws_subnet.example.id
+  ami                         = data.aws_ami.amzn-linux-2023-ami.id
+  instance_type               = "c6a.2xlarge"
+  subnet_id                   = aws_subnet.example.id
   associate_public_ip_address = false
 
   cpu_options {
