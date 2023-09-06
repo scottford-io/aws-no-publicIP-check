@@ -1,0 +1,69 @@
+policies:
+    - uid: aws-security-hub
+      name: AWS EC2 PublicIp Check
+      version: 1.0.0
+      scoring_system: 2
+      authors:
+        - name: Mondoo, Inc.
+          email: hello@mondoo.com
+      tags:
+        mondoo.com/platform: aws,cloud
+        mondoo.com/category: security
+      docs:
+        desc: |
+          #### Overview
+          This control checks whether EC2 instances have a public IP address. The control fails if the publicIp field is present in the EC2 instance configuration item. This control applies to IPv4 addresses only.
+
+          A public IPv4 address is an IP address that is reachable from the internet. If you launch your instance with a public IP address, then your EC2 instance is reachable from the internet. A private IPv4 address is an IP address that is not reachable from the internet. You can use private IPv4 addresses for communication between EC2 instances in the same VPC or in your connected private network.
+
+          IPv6 addresses are globally unique, and therefore are reachable from the internet. However, by default all subnets have the IPv6 addressing attribute set to false. For more information about IPv6, see IP addressing in your VPC in the Amazon VPC User Guide.
+
+          If you have a legitimate use case to maintain EC2 instances with public IP addresses, then you can suppress the findings from this control. For more information about front-end architecture options, see the AWS Architecture Blog or the This Is My Architecture series.
+      groups: 
+        - title: AWS EC2 PublicIp Checks
+          checks:
+            - uid: aws-security-hub-ec2-instance-no-public-ip
+queries:
+  - uid: aws-security-hub-ec2-instance-no-public-ip
+    title: '[EC2.9] Amazon EC2 instances should not have a public IPv4 address' 
+    impact: 80 
+    docs: 
+      desc: |
+        Related requirements: NIST.800-53.r5 AC-21, NIST.800-53.r5 AC-3, NIST.800-53.r5 AC-3(7), NIST.800-53.r5 AC-4, NIST.800-53.r5 AC-4(21), NIST.800-53.r5 AC-6, NIST.800-53.r5 SC-7, NIST.800-53.r5 SC-7(11), NIST.800-53.r5 SC-7(16), NIST.800-53.r5 SC-7(20), NIST.800-53.r5 SC-7(21), NIST.800-53.r5 SC-7(3), NIST.800-53.r5 SC-7(4), NIST.800-53.r5 SC-7(9)
+
+        Category: Protect > Secure network configuration > Public IP addresses
+
+        Severity: High
+
+        Resource type: AWS::EC2::Instance
+
+        AWS Config rule: ec2-instance-no-public-ip
+
+        Schedule type: Change triggered
+
+        Parameters: None
+
+        This control checks whether EC2 instances have a public IP address. The control fails if the publicIp field is present in the EC2 instance configuration item. This control applies to IPv4 addresses only.
+
+        A public IPv4 address is an IP address that is reachable from the internet. If you launch your instance with a public IP address, then your EC2 instance is reachable from the internet. A private IPv4 address is an IP address that is not reachable from the internet. You can use private IPv4 addresses for communication between EC2 instances in the same VPC or in your connected private network.
+
+        IPv6 addresses are globally unique, and therefore are reachable from the internet. However, by default all subnets have the IPv6 addressing attribute set to false. For more information about IPv6, see IP addressing in your VPC in the Amazon VPC User Guide.
+
+        If you have a legitimate use case to maintain EC2 instances with public IP addresses, then you can suppress the findings from this control. For more information about front-end architecture options, see the AWS Architecture Blog or the This Is My Architecture series.
+    variants:
+      - uid: aws-security-hub-ec2-instance-no-public-ip-api
+      - uid: aws-security-hub-ec2-instance-no-public-ip-single
+      - uid: aws-security-hub-ec2-instance-no-public-ip-terraform-hcl
+      - uid: aws-security-hub-ec2-instance-no-public-ip-terraform-plan
+  - uid: aws-security-hub-ec2-instance-no-public-ip-api
+    filters: asset.platform == "aws"
+    mql: aws.ec2.instances.all( publicIp == "" )
+  - uid: aws-security-hub-ec2-instance-no-public-ip-single
+    filters: asset.platform == "aws-instance"
+    mql: aws.ec2.instance.publicIp == ""
+  - uid: aws-security-hub-ec2-instance-no-public-ip-terraform-hcl
+    filters: asset.platform == "terraform-hcl" && terraform.resources.any( nameLabel == "aws_instance" ) 
+    mql: terraform.resources.where( nameLabel == "aws_instance" ).all( arguments['associate_public_ip_address'] != true )
+  - uid: aws-security-hub-ec2-instance-no-public-ip-terraform-plan
+    filters: asset.platform == "terraform-plan" && terraform.plan.resourceChanges.any( type == "aws_instance" ) 
+    mql: terraform.plan.resourceChanges.where( type == "aws_instance" ).all( change.after['associate_public_ip_address'] != true )
